@@ -1,46 +1,56 @@
-import chalk from "chalk";
-import readline from 'readline';
-// //creación de la interfaz readline utilizando el método createInterface()
-// Se configurala entrada estándar (process.stdin) como entrada y la salida estándar (process.stdout) como salida de la interfaz.
+const readline = require("readline")
+const http = require("http");
+const port = 3000;
+const host = "localhost";
+
 const readlineInterface = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
-const tasks = []; //para almacenar las tareas ingresadas por el usuario
+const tasks = []; 
 
+const server = http.createServer((req, res) => {
+    if (req.method === "GET" && req.url === "/tasks") {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(tasks));
+    } else {
+        res.writeHead(404, { 'Content-Type': 'text/plain' });
+        res.end('Recurso no encontrado');
+    }
+});
+server.listen(port, host, () => {
+    console.log("")
+})
+
+const questionAsync = (question) => {
+    return new Promise((resolve) => {
+        readlineInterface.question(question, resolve);
+    });
+};
 const addTask = () => {
     return new Promise(async(resolve) => {
-        const indicator = await questionAsync(chalk.green("Por favor, digite un indicador único para la tarea: ")); // await antes de qestionAsyn para esperar la respuesta del usuario
+        const indicator = await questionAsync("Por favor, digite un indicador único para la tarea: "); // await antes de qestionAsyn para esperar la respuesta del usuario
         if (isNaN(indicator)) {
-            (console.log(chalk.red("EL INDICADOR DEBE SER UN NÚMERO❗👉VUELVE A INTENTAR")))
+            (console.log("EL INDICADOR DEBE SER UN NÚMERO❗👉VUELVE A INTENTAR"))
             showMenu();
             return;
         }
         const repeatedTask = tasks.find(task => task.indicator === indicator);
         if (repeatedTask) {
-            (console.log(chalk.red("YA EXISTE UNA TAREA CON EL MISMO INDICADOR❌👉SELECCIONA OTRO NÚMERO")));
+            (console.log("YA EXISTE UNA TAREA CON EL MISMO INDICADOR❌👉SELECCIONA OTRO NÚMERO"));
                 showMenu();
                 return;
         }
-        const description = await questionAsync(chalk.green("Digite una descripción para la tarea que desee agregar: "));
-            // Luego de obtener las respuestas del usuario, se crea la tarea y se agrega al array de tareas y se muestra un mensaje de confirmación            
+        const description = await questionAsync("Digite una descripción para la tarea que desee agregar: ");
         const task = {
             indicator,
             description,
             completed: false
         };
-            //se llama a resolve para indicar que la promesa se cumplió
         tasks.push(task);
-        console.log(chalk.magenta("TAREA AGREGADA CORRECTAMENTE✅"));
+        console.log("TAREA AGREGADA CORRECTAMENTE✅");
         resolve();
         showMenu();
-    });
-};
-
-// función auxiliar que envuelve readlineInterface.question() en una promesa
-const questionAsync = (question) => {
-    return new Promise((resolve) => {
-        readlineInterface.question(question, resolve);
     });
 };
 
@@ -50,11 +60,9 @@ const deleteTask = () => {
         const taskIndex = tasks.findIndex(task => task.indicator === indicator);
         if (taskIndex !== -1) {
             tasks.splice(taskIndex, 1);
-            console.log(chalk.bold.magenta
-                    ("TAREA ELIMINADA CORRECTAMENTE✅"));
+            console.log("TAREA ELIMINADA CORRECTAMENTE✅");
         } else {
-            console.log(chalk.red
-                ("¡NINGUNA TAREA COINCIDE CON EL INDICADOR PROPORCIONADO❗"));
+            console.log("¡NINGUNA TAREA COINCIDE CON EL INDICADOR PROPORCIONADO❗");
         }
         resolve();
         showMenu();
@@ -67,16 +75,16 @@ const completeTask = () => {
         const task = tasks.find(task => task.indicator === indicator);
         if (task) {
             task.completed = true;
-            console.log(chalk.magenta("TAREA MARCADA COMO COMPLETADA CORRECTAMENTE✅"));
+            console.log("TAREA MARCADA COMO COMPLETADA CORRECTAMENTE✅");
         } else {
-            console.log(chalk.red("¡NINGUNA TAREA COINCIDE CON EL INDICADOR PROPORCIONADO❗"));
+            console.log("¡NINGUNA TAREA COINCIDE CON EL INDICADOR PROPORCIONADO❗");
         }
         resolve();
         showMenu();
     });
 };
 
-const showTasks = () => {
+const showTasks = () => {   
     console.log("Task List: ");
     tasks.forEach((task, index) => {
         console.log(`[${index}] Indicador: ${task.indicator} | Descripción: ${task.description} | Completada: ${task.completed ? "Sí" : "No"}`);
@@ -85,7 +93,7 @@ const showTasks = () => {
 };
 
 const showMenu = () => {
-    console.log(chalk.bold.yellow('\n--- MENU ---'));
+    console.log('\n--- MENU ---');
     console.log('1. Agregar tarea');
     console.log('2. Eliminar tarea');
     console.log('3. Marcar tarea como completada');
@@ -94,7 +102,7 @@ const showMenu = () => {
 
     readlineInterface.question('\nSeleccione una opción: ', (option) => {
         switch (option) {
-            case '1':
+            case "1":
                 addTask();
                 break;
             case '2':
@@ -107,17 +115,17 @@ const showMenu = () => {
                 showTasks();
                 break;
             case '5':
-                rl.close();
+                readlineInterface.close();
                 break;
             default:
-                console.log(chalk.red("INVÁLIDO. DEBE INGRESAR ESCOGER UNA DE LAS OPCIONES DEL MENÚ: 1, 2, 3, 4, 5"));
+                console.log("INVÁLIDO. DEBE INGRESAR ESCOGER UNA DE LAS OPCIONES DEL MENÚ: 1, 2, 3, 4, 5");
                 showMenu();
                 break;
         }
     });
 };
 
-console.log(chalk.bold.blue("BIENVENIDO A LA APP PARA ADMINISTRAR TUS TAREAS"));
+console.log("BIENVENIDO A LA APP PARA ADMINISTRAR TUS TAREAS");
 
 showMenu();
 
