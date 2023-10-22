@@ -22,7 +22,7 @@ Aplicación creada con Node.js para crear y eliminar tareas utilizando el modulo
 
 1. Clonar este repositorio:
 ``` 
-git clone <https://github.com/aarroyavez/node-server>
+git clone <https://github.com/mrestrepoj2/server-node>
 ``` 
 2. Acceder al directorio:
 ```
